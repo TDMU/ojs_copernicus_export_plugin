@@ -1,5 +1,5 @@
 {**
- * plugins/importexport/copernicus/templates/validate.tpl
+ * plugins/importexport/sample/issues.tpl
  *
  * Copyright (c) 2013-2015 Simon Fraser University Library
  * Copyright (c) 2003-2015 John Willinsky
@@ -19,54 +19,54 @@
 <br/>
 
 <style type="text/css">
-	{literal}
-	pre, cont
-	{
-		counter-reset: line;
-		font-family: monospace;
-		background-color: #fff;
-		padding: 0.5em;
-		border-radius: .25em;
-		box-shadow: .1em .1em .5em rgba(0,0,0,.45);
-		line-height: 0;
-	}
-	pre span
-	{
-		counter-increment: line;
-		display: block;
-		line-height: 1.5rem;
-		overflow: hidden;
-	}
-	pre span::before
-	{
-		content: counter(line);
-		-webkit-user-select: none;
+{literal}
+pre.xml, .cont
+{
+	counter-reset: line;
+	font-family: monospace;
+	background-color: #fff;
+	padding: 0.5em;
+	border-radius: .25em;
+	box-shadow: .1em .1em .5em rgba(0,0,0,.45);
+	line-height: 0;
+}
+pre.xml span
+{
+	counter-increment: line;
+	display: block;
+	line-height: 1.5rem;
+	overflow: hidden;
+}
+pre.xml span::before
+{
+	content: counter(line);
+	-webkit-user-select: none;
 
-		display: inline-block;
-		border-right: 1px solid #ddd;
-		padding: 0 .5em;
-		margin-right: .5em;
-		color: #888;
-		width:2em;
-		text-align: right;
-	 }
-	.warning
-	{
-		background-color: yellow;
-	}
-	.error
-	{
-		background-color: #DD4A68;
-	}
-	.fatal
-	{
-		background-color: orchid;
-	}
-	.ok
-	{
-		background-color: lightgreen;
-	}
-	{/literal}
+	display: inline-block;
+	border-right: 1px solid #ddd;
+	padding: 0 .5em;
+	margin-right: .5em;
+	color: #888;
+	width:2em;
+	text-align: right;
+ }
+.warning
+{
+	background-color: yellow;
+}
+.error
+{
+	background-color: #DD4A68;
+}
+.fatal
+{
+	background-color: orchid;
+}
+.ok
+{
+	background-color: lightgreen;
+}
+{/literal}
 </style>
 
 <div class="cont">
@@ -93,14 +93,14 @@
 
 <div>
 	<h2>Generated XML file</h2>
-<pre>
+<pre class="xml">
 {foreach from=$xml_lines item=line key=i}
 	<span id="{$i+1}">{$line}</span>
 {/foreach}
 </pre>
 </div>
 
-<!--
+
 <div id="issues">
 <table width="100%" class="listing">
 	<tr>
@@ -127,7 +127,7 @@
 		<td colspan="4" class="{if $issues->eof()}end{/if}separator">&nbsp;</td>
 	</tr>
 {/iterate}
-{if $issues->wasEmpty()}
+{if !$issues}
 	<tr>
 		<td colspan="4" class="nodata">{translate key="issue.noIssues"}</td>
 	</tr>
@@ -143,5 +143,5 @@
 </table>
 </div>
 
--->
+
 {/block}

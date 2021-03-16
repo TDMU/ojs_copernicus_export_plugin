@@ -13,7 +13,6 @@
  */
 
 import('lib.pkp.classes.plugins.ImportExportPlugin');
-// import('lib.pkp.classes.xml.XMLCustomWriter');
 
 
 class CopernicusExportPlugin extends ImportExportPlugin
@@ -302,11 +301,14 @@ class CopernicusExportPlugin extends ImportExportPlugin
                 $issue = $issueDao->getById($issueId, $journal->getId());
                 if (!$issue) $request->redirect();
 
-                $doc = XMLCustomWriter::createDocument();
+                $impl = new DOMImplementation();
+                $doc = $impl->createDocument('1.0', '');
+                $doc->encoding = 'UTF-8';
                 #var_dump($doc->saveXML());
 
                 $issueNode = $this->generateIssueDom($doc, $journal, $issue);
-                XMLCustomWriter::appendChild($doc, $issueNode);
+                // XMLCustomWriter::appendChild($doc, $issueNode);
+                $doc->appendChild($issueNode);
 
                 $xmlDocument = new DOMDocument('1.0', 'UTF-8');
                 $xmlDocument->preserveWhiteSpace = false;
@@ -346,7 +348,6 @@ class CopernicusExportPlugin extends ImportExportPlugin
                 $journal = $request->getJournal();
                 $issueDao =& DAORegistry::getDAO('IssueDAO');
                 $issues = $issueDao->getIssues($journal->getId(), Handler::getRangeInfo($request, 'issues'));
-
                 $templateMgr = TemplateManager::getManager($request);
 
                 if (method_exists($this, "getTemplateResource")) { # for ojs >= 3.1.2
