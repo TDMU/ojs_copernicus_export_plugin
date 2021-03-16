@@ -11,9 +11,10 @@
 {strip}
 {assign var="pageTitle" value="plugins.importexport.copernicus.selectIssue.long"}
 {assign var="pageCrumbTitle" value="plugins.importexport.copernicus.selectIssue.short"}
-{include file="common/header.tpl"}
 {/strip}
 
+{extends file="layouts/backend.tpl"}
+{block name="page"}
 <br/>
 
 <div id="issues">
@@ -59,4 +60,4 @@
 {/if}
 </table>
 </div>
-{include file="common/footer.tpl"}
+{/block}
