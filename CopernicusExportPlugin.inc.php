@@ -13,7 +13,7 @@
  */
 
 import('lib.pkp.classes.plugins.ImportExportPlugin');
-import('lib.pkp.classes.xml.XMLCustomWriter');
+// import('lib.pkp.classes.xml.XMLCustomWriter');
 
 
 class CopernicusExportPlugin extends ImportExportPlugin
@@ -96,23 +96,23 @@ class CopernicusExportPlugin extends ImportExportPlugin
         $issn = $journal->getSetting('printIssn');
         $issn = $issn ? $issn : $journal->getSetting('onlineIssn');
 
-        $root =& XMLCustomWriter::createElement($doc, 'ici-import');
-        XMLCustomWriter::setAttribute($root, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        XMLCustomWriter::setAttribute($root, "xsi:noNamespaceSchemaLocation", "https://journals.indexcopernicus.com/ic-import.xsd");
+        // $root =& XMLCustomWriter::createElement($doc, 'ici-import');
+        $root = $doc->createElement('ici-import');
+        $root->setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        $root->setAttribute("xsi:noNamespaceSchemaLocation", "https://journals.indexcopernicus.com/ic-import.xsd");
 
+        $journal_elem = self::createChildWithText($doc, $root, 'journal', '', true);
+        $journal_elem->setAttribute('issn', $issn);
 
-        $journal_elem = XMLCustomWriter::createChildWithText($doc, $root, 'journal', '', true);
-        XMLCustomWriter::setAttribute($journal_elem, 'issn', $issn);
-
-        $issue_elem = XMLCustomWriter::createChildWithText($doc, $root, 'issue', '', true);
+        $issue_elem = self::createChildWithText($doc, $root, 'issue', '', true);
 
         $pub_issue_date = $issue->getDatePublished() ? str_replace(' ', "T", $issue->getDatePublished()) . 'Z' : '';
 
 
-        XMLCustomWriter::setAttribute($issue_elem, 'number', $issue->getNumber());
-        XMLCustomWriter::setAttribute($issue_elem, 'volume', $issue->getVolume());
-        XMLCustomWriter::setAttribute($issue_elem, 'year', $issue->getYear());
-        XMLCustomWriter::setAttribute($issue_elem, 'publicationDate', $pub_issue_date, false);
+        $issue_elem->setAttribute('number', $issue->getNumber());
+        $issue_elem->setAttribute('volume', $issue->getVolume());
+        $issue_elem->setAttribute('year', $issue->getYear());
+        $issue_elem->setAttribute('publicationDate', $pub_issue_date);
 
         $sectionDao =& DAORegistry::getDAO('SectionDAO');
 
@@ -155,14 +155,14 @@ class CopernicusExportPlugin extends ImportExportPlugin
                     if (!$title)
                         continue;
                     $locales = array_keys($title);
-                    $article_elem = XMLCustomWriter::createChildWithText($doc, $issue_elem, 'article', '', true);
-                    XMLCustomWriter::createChildWithText($doc, $article_elem, 'type', 'ORIGINAL_ARTICLE');
+                    $article_elem = self::createChildWithText($doc, $issue_elem, 'article', '', true);
+                    self::createChildWithText($doc, $article_elem, 'type', 'ORIGINAL_ARTICLE');
                     foreach ($locales as $loc) {
                         $lc = explode('_', $loc);
-                        $lang_version = XMLCustomWriter::createChildWithText($doc, $article_elem, 'languageVersion', '', true);
-                        XMLCustomWriter::setAttribute($lang_version, 'language', $lc[0]);
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'title', $article->getLocalizedTitle($loc), true);
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'abstract', strip_tags($article->getLocalizedData('abstract', $loc)), true);
+                        $lang_version = self::createChildWithText($doc, $article_elem, 'languageVersion', '', true);
+                        $lang_version->setAttribute('language', $lc[0]);
+                        self::createChildWithText($doc, $lang_version, 'title', $article->getLocalizedTitle($loc), true);
+                        self::createChildWithText($doc, $lang_version, 'abstract', strip_tags($article->getLocalizedData('abstract', $loc)), true);
 
 
                         if (is_a($article, 'PublishedArticle')) {
@@ -170,36 +170,36 @@ class CopernicusExportPlugin extends ImportExportPlugin
                                 $url = Request::url($journal->getPath()) . '/article/download/' . $article->getBestArticleId() . '/' . $galley->getBestGalleyId();
                                 break;
                             }
-                            XMLCustomWriter::createChildWithText($doc, $lang_version, 'pdfFileUrl', $url, true);
+                            self::createChildWithText($doc, $lang_version, 'pdfFileUrl', $url, true);
                         }
 
                         $publicationDate = $_article->getDatePublished() . 'T00:00:00Z';
 
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'publicationDate', $publicationDate, false);
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'pageFrom', $article->getStartingPage(), true);
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'pageTo', $article->getEndingPage(), true);
-                        XMLCustomWriter::createChildWithText($doc, $lang_version, 'doi', $article->getStoredPubId('doi'), true);
+                        self::createChildWithText($doc, $lang_version, 'publicationDate', $publicationDate, false);
+                        self::createChildWithText($doc, $lang_version, 'pageFrom', $article->getStartingPage(), true);
+                        self::createChildWithText($doc, $lang_version, 'pageTo', $article->getEndingPage(), true);
+                        self::createChildWithText($doc, $lang_version, 'doi', $article->getStoredPubId('doi'), true);
 
-                        $keywords = XMLCustomWriter::createChildWithText($doc, $lang_version, 'keywords', '', true);
+                        $keywords = self::createChildWithText($doc, $lang_version, 'keywords', '', true);
 
                         $kwds = $submissionKeywordDao->getKeywords($_article->getId(), array($loc));
                         if ($kwds)
                             $kwds = $kwds[$loc];
                         $j = 0;
                         foreach ($kwds as $k) {
-                            XMLCustomWriter::createChildWithText($doc, $keywords, 'keyword', $k, true);
+                            self::createChildWithText($doc, $keywords, 'keyword', $k, true);
                             $j++;
                         }
                         if ($j == 0) {
-                            XMLCustomWriter::createChildWithText($doc, $keywords, 'keyword', " ", true);
+                            self::createChildWithText($doc, $keywords, 'keyword', " ", true);
                         }
 
 
                     }
-                    $authors_elem = XMLCustomWriter::createChildWithText($doc, $article_elem, 'authors', '', true);
+                    $authors_elem = self::createChildWithText($doc, $article_elem, 'authors', '', true);
                     $index = 1;
                     foreach ($article->getData('authors') as $author) {
-                        $author_elem = XMLCustomWriter::createChildWithText($doc, $authors_elem, 'author', '', true);
+                        $author_elem = self::createChildWithText($doc, $authors_elem, 'author', '', true);
 
                         $author_FirstName = '';
                         $author_MiddleName = '';
@@ -220,14 +220,14 @@ class CopernicusExportPlugin extends ImportExportPlugin
                         }
 
 
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'name', $author_FirstName, true);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'name2', $author_MiddleName, false);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'surname', $author_LastName, true);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'email', $author->getEmail(), false);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'order', $index, true);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'instituteAffiliation', substr($author->getLocalizedAffiliation(), 0, 250), false);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'role', 'AUTHOR', true);
-                        XMLCustomWriter::createChildWithText($doc, $author_elem, 'ORCID', $author->getData('orcid'), false);
+                        self::createChildWithText($doc, $author_elem, 'name', $author_FirstName, true);
+                        self::createChildWithText($doc, $author_elem, 'name2', $author_MiddleName, false);
+                        self::createChildWithText($doc, $author_elem, 'surname', $author_LastName, true);
+                        self::createChildWithText($doc, $author_elem, 'email', $author->getEmail(), false);
+                        self::createChildWithText($doc, $author_elem, 'order', $index, true);
+                        self::createChildWithText($doc, $author_elem, 'instituteAffiliation', substr($author->getLocalizedAffiliation(), 0, 250), false);
+                        self::createChildWithText($doc, $author_elem, 'role', 'AUTHOR', true);
+                        self::createChildWithText($doc, $author_elem, 'ORCID', $author->getData('orcid'), false);
 
                         $index++;
                     }
@@ -239,14 +239,14 @@ class CopernicusExportPlugin extends ImportExportPlugin
 
                     if ($citation_text) {
                         $citation_arr = explode("\n", $citation_text);
-                        $references_elem = XMLCustomWriter::createChildWithText($doc, $article_elem, 'references', '', true);
+                        $references_elem = self::createChildWithText($doc, $article_elem, 'references', '', true);
                         $index = 1;
                         foreach ($citation_arr as $citation) {
                             if ($citation == "") continue;
-                            $reference_elem = XMLCustomWriter::createChildWithText($doc, $references_elem, 'reference', '', true);
-                            XMLCustomWriter::createChildWithText($doc, $reference_elem, 'unparsedContent', $citation, true);
-                            XMLCustomWriter::createChildWithText($doc, $reference_elem, 'order', $index, true);
-                            XMLCustomWriter::createChildWithText($doc, $reference_elem, 'doi', '', true);
+                            $reference_elem = self::createChildWithText($doc, $references_elem, 'reference', '', true);
+                            self::createChildWithText($doc, $reference_elem, 'unparsedContent', $citation, true);
+                            self::createChildWithText($doc, $reference_elem, 'order', $index, true);
+                            self::createChildWithText($doc, $reference_elem, 'doi', '', true);
                             $index++;
                         }
                     }
@@ -254,21 +254,23 @@ class CopernicusExportPlugin extends ImportExportPlugin
 
                 }
             }
-            XMLCustomWriter::setAttribute($issue_elem, 'numberOfArticles', $num_articles, false);
+            $issue_elem->setAttribute('numberOfArticles', $num_articles);
             return $root;
         }
     }
 
     function exportIssue(&$journal, &$issue, $outputFile = null)
     {
-        //$this->import('JATSExportDom');
-        $doc =& XMLCustomWriter::createDocument();
+        $impl = new DOMImplementation();
+        $doc = $impl->createDocument('1.0', '');
+        $doc->encoding = 'UTF-8';
 
         $issueNode = $this->generateIssueDom($doc, $journal, $issue);
-        XMLCustomWriter::appendChild($doc, $issueNode);
+        $doc->appendChild($issueNode);
         if (!empty($outputFile)) {
             if (($h = fopen($outputFile, 'wb')) === false) return false;
-            fwrite($h, XMLCustomWriter::getXML($doc));
+            // fwrite($h, XMLCustomWriter::getXML($doc));
+            fwrite($h, $doc->saveXML());
             fclose($h);
         } else {
 
@@ -373,5 +375,19 @@ class CopernicusExportPlugin extends ImportExportPlugin
     {
         echo "USAGE NOT AVAILABLE.\n"
             . "This is a sample plugin and does not actually perform a function.\n";
+    }
+
+    // &appendChild(&$parentNode, &$child)
+    // $node = $parentNode->appendChild($child);
+
+    private static function createChildWithText(&$doc, &$node, $name, $value, $appendIfEmpty = true) {
+        $childNode = null;
+        if($appendIfEmpty || $value != '') {
+            $childNode = $doc->createElement($name);
+            $textNode = $doc->createTextNode($value);
+            $childNode->appendChild($textNode);
+            $node->appendChild($childNode);
+        }
+        return $childNode;
     }
 }
