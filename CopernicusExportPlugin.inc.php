@@ -105,7 +105,8 @@ class CopernicusExportPlugin extends ImportExportPlugin
 
         $issue_elem = self::createChildWithText($doc, $root, 'issue', '', true);
 
-        $pub_issue_date = $issue->getDatePublished() ? str_replace(' ', "T", $issue->getDatePublished()) . 'Z' : '';
+        //$pub_issue_date = $issue->getDatePublished() ? str_replace(' ', "T", $issue->getDatePublished()) . 'Z' : ''; //time cause IC error 
+        $pub_issue_date = $issue->getDatePublished() ? strtok( $issue->getDatePublished(), ' ') : '';
 
 
         $issue_elem->setAttribute('number', $issue->getNumber());
@@ -172,7 +173,8 @@ class CopernicusExportPlugin extends ImportExportPlugin
                             self::createChildWithText($doc, $lang_version, 'pdfFileUrl', $url, true);
                         }
 
-                        $publicationDate = $_article->getDatePublished() . 'T00:00:00Z';
+                        //$publicationDate = $_article->getDatePublished() . 'T00:00:00Z'; //time cause IC error
+                        $publicationDate = $_article->getDatePublished();
 
                         self::createChildWithText($doc, $lang_version, 'publicationDate', $publicationDate, false);
                         self::createChildWithText($doc, $lang_version, 'pageFrom', $article->getStartingPage(), true);
@@ -180,8 +182,8 @@ class CopernicusExportPlugin extends ImportExportPlugin
                         self::createChildWithText($doc, $lang_version, 'doi', $article->getStoredPubId('doi'), true);
 
                         $keywords = self::createChildWithText($doc, $lang_version, 'keywords', '', true);
+                        $kwds = $submissionKeywordDao->getKeywords($article->getId(), array($loc)); //fix IC error
 
-                        $kwds = $submissionKeywordDao->getKeywords($_article->getId(), array($loc));
                         if ($kwds)
                             $kwds = $kwds[$loc];
                         $j = 0;
