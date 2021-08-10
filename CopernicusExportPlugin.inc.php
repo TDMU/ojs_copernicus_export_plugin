@@ -243,7 +243,7 @@ class CopernicusExportPlugin extends ImportExportPlugin
                         $references_elem = self::createChildWithText($doc, $article_elem, 'references', '', true);
                         $index = 1;
                         foreach ($citation_arr as $citation) {
-                            if ($citation == "") continue;
+                            if (empty(trim($citation))) continue;
                             $reference_elem = self::createChildWithText($doc, $references_elem, 'reference', '', true);
                             self::createChildWithText($doc, $reference_elem, 'unparsedContent', $citation, true);
                             self::createChildWithText($doc, $reference_elem, 'order', $index, true);
